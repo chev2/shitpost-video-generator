@@ -5,7 +5,7 @@ Generates an output video with overlayed audio and effects using a list of audio
 Here's how it works:
 1. Gets all video & audio sources in the `VideoSources` and `AudioSources` folders.
 2. Gets a seed for the random module, which can be used if a user wants to re-generate the same video again.
-3. Chooses _n_ random videos where _n_ is the number of videos the user wants to merge into the final results (e.g. if you want to merge 40 different videos, it chooses 40 random videos). The max amount of random videos is capped to the number of video files in the `VideoSources` folder.
+3. Chooses _n_ random videos where _n_ is the number of videos the user wants to merge into the final results (e.g. if you want to merge 40 different videos, it chooses 40 random videos). The script will first to attempt to avoid duplicate videos. If the chosen video amount is higher than the available videos, then the script will add duplicate videos to meet that amount.
 4. Applies a bunch of random effects to the video files, which include trimming the video to be a random short length, mirroring the video, speeding it up or slowing it down, reversing the video, as well as other effects.
 5. Merges all the now effect-applied videos into one big video.
 6. Applies effects to the audio files, which include trimming the audio to be a random short length. The script will also attemt to repeat audio clips less than 5 seconds to give a repetitive-like nature to the end result.
