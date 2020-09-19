@@ -1,3 +1,22 @@
+# Repository-specific
+VideoSources/*.mp4
+AudioSources/*.mp3
+VideoToBeConverted/*.mp4
+RecodeVideoFiles.py
+
+*.mp4
+
+# Repository-specific - only allow these video and audio sources
+!VideoSources/DOOR STUCK! DOOR STUCK!.mp4
+!VideoSources/FUS RO DAH!!!.mp4
+!VideoSources/Me at the zoo.mp4
+!AudioSources/BOOM.mp3
+!AudioSources/Bruh Sound Effect #2.mp3
+!AudioSources/Damn Son.mp3
+
+# Visual Studio Code
+*.code-workspace
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
