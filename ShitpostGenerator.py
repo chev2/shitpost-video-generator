@@ -77,10 +77,6 @@ def ShuffleVideo(clip): #take a clip, split it into multiple parts, shuffle thos
 
     return finalClip
 
-def BadQuality(clip):
-    w, h = clip.size
-    return clip.resize((rng.randint(32, w), rng.randint(32, h))).resize((w, h))
-
 videoEffects = [
     lambda v: fx.speedx.speedx(v, rng.uniform(0.7, 3)), #speed up/slow down
     lambda v: fx.mirror_x.mirror_x(v), #mirror on the x axis
@@ -89,8 +85,7 @@ videoEffects = [
     lambda v: RepeatVideo(v), #repeat the video multiple times
     lambda v: ShuffleVideo(v), #shuffle up parts of the video for a glitch-like effect
     lambda v: ContinuousFlipVideo(v), #flip the video on the x and y axis multiple times
-    lambda v: fx.lum_contrast.lum_contrast(v, lum=0, contrast=rng.uniform(0.3, 2)), #change contrast
-    lambda v: BadQuality(v)
+    lambda v: fx.lum_contrast.lum_contrast(v, lum=0, contrast=rng.uniform(0.3, 2)) #change contrast
 ]
 
 videoObjects = []
