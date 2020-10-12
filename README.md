@@ -15,7 +15,7 @@ Here's how it works:
 1. Put a list of desired video sources into the `VideoSources` folder, and a list of desired audio sources into the `AudioSources` folder. I recommend keeping the video file formats the same, but it shouldn't matter. The resolution of videos does not matter, either.
 2. Run the script, and choose a seed if you want to reproduce the same video. Otherwise, type 'any' to choose a random seed.
 3. Choose the amount of videos you want the script to merge together to produce the final result. I recommend 30 for roughly minute-long videos.
-4. The script will do the rest, and generate the final video in the root folder, which will be formatted as `final_result_<seed>_<number-of-videos>.mp4`.
+4. The script will do the rest, and generate the final video in the root folder, which will be formatted as `final_result_<seed>_<number-of-videos>_<effects-enabled>.mp4`.
 
 ## Performance
 This script uses moviepy - due to the amount of ffmpeg processes moviepy opens from this script, it has really high memory usage. I have seen this script use upwards of about ~2.5GB of memory for 40 random videos.

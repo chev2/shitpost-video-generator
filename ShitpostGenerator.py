@@ -97,6 +97,12 @@ while not videoAmount.isdecimal():
 
 videoAmount = int(videoAmount)
 
+shouldUseEffects = input("Apply video effects? (y/n): ")
+while not shouldUseEffects in ["y", "yes", "true", "n", "no", "false"]:
+    shouldUseEffects = input("Apply video effects? (y/n): ")
+
+shouldUseEffects = True if shouldUseEffects in ["y", "yes", "true"] else False
+
 randomVideos = rng.sample(videoFiles, min(videoAmount, len(videoFiles)))
 if videoAmount > len(videoFiles): #if there is a higher chosen amount than total, re-use videos
     videoAmountToAdd = videoAmount - len(videoFiles)
@@ -116,7 +122,7 @@ for video in randomVideos:
         startOffset = rng.uniform(0, newClip.duration - randomDuration)
         newClip = newClip.subclip(startOffset, startOffset+randomDuration)
 
-    if rng.choice([True, True, False]):
+    if rng.choice([True, True, False]) and shouldUseEffects:
         newClip = rng.choice(videoEffects)(newClip) #apply a random effect
 
     videoObjects.append(newClip)
@@ -145,7 +151,7 @@ for audio in randomSounds:
     newClip = moviepy.audio.fx.volumex.volumex(newClip, 0.5) # modify volume
 
     if newClip.duration > 5: #for long clips
-        randomDuration = rng.uniform(0.7, 6) # crop audio duration
+        randomDuration = rng.uniform(0.7, 13) # crop audio duration
         if newClip.duration > randomDuration: # if the audio is longer than the cropped duration, crop the audio at a random position
             startOffset = rng.choice([rng.uniform(0, newClip.duration - randomDuration), 0]) #either use a random offset, or start at beginning of audio clip
             newClip = newClip.subclip(startOffset, startOffset+randomDuration)
@@ -171,8 +177,10 @@ print(f"Finished compiling audio. Added {copiedSoundAmount} duplicate sounds, to
 
 newAudioClip = editor.CompositeAudioClip([finalVideo.audio] + audioObjects)
 
+finalVideoFilename = f'final_result_{seed}_{videoAmount}{"_effects" if shouldUseEffects else ""}.mp4'
+
 finalVideo.audio = newAudioClip
-finalVideo.write_videofile(f'final_result_{seed}_{videoAmount}.mp4', fps=30, audio_bitrate="96k")
+finalVideo.write_videofile(finalVideoFilename, fps=30, audio_bitrate="96k")
 
 for video in videoObjects:
     video.close()
