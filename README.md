@@ -17,6 +17,9 @@ Here's how it works:
 3. Choose the amount of videos you want the script to merge together to produce the final result. I recommend 30 for roughly minute-long videos.
 4. The script will do the rest, and generate the final video in the root folder, which will be formatted as `final_result_<seed>_<number-of-videos>.mp4`.
 
+## Performance
+This script uses moviepy - due to the amount of ffmpeg processes moviepy opens from this script, it has really high memory usage. I have seen this script use upwards of about ~2.5GB of memory for 40 random videos.
+
 ## Requirements
 - Python `3.8` (an older version may work, but this one's verified working)
 - Python module `moviepy`
