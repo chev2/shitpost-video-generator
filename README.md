@@ -11,7 +11,17 @@ Here's how it works:
 6. Applies effects to the audio files, which include trimming the audio to be a random short length. The script will also attempt to repeat audio clips less than 5 seconds to give a repetitive-like nature to the end result.
 7. The merged video clip & merged audio clip is then merged together to produce the final result, which is put into the `output/` directory.
 
+## Requirements
+Python `3.8` or greater is required. This project has been tested on Python `3.8` and `3.11`.
+
+Installing dependencies:
+1. Install the latest version of MoviePy: `pip install -U moviepy`
+2. **Workaround 2023-07-17**: There is currently an incompatibility with Pillow and MoviePy's video.resize() method, so you'll have to downgrade Pillow for the time being: `pip install Pillow==9.5.0`
+3. That's all! You should be able to run the main script just fine now: `python3 main.py`
+
 ## How to use
+Please take a look at the **requirements** above before following these steps.
+
 1. Put a list of desired video sources into the `input_video_sources/` directory, and a list of desired audio sources into the `input_audio_sources` directory. I recommend keeping the video file formats the same, but it shouldn't matter. The resolution of videos does not matter, either.
 2. Run the script (`python3 main.py`), and choose a seed if you want to reproduce the same video. Otherwise, type 'any' to choose a random seed.
 3. Choose the amount of videos you want the script to merge together to produce the final result. I recommend 30 for roughly minute-long videos.
@@ -19,7 +29,3 @@ Here's how it works:
 
 ## Performance
 This script uses moviepy - due to the amount of ffmpeg processes moviepy opens from this script, it has really high memory usage. I have seen this script use upwards of about ~2.5GB of memory for 40 random loaded videos. I don't know of a way around this.
-
-## Requirements
-- Python `3.8` or greater (this project was tested on Python `3.8`).
-- Python module `moviepy`
