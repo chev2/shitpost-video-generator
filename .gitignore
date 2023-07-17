@@ -1,21 +1,36 @@
 # Repository-specific
-VideoSources/*.mp4
-AudioSources/*.mp3
-VideoToBeConverted/*.mp4
-RecodeVideoFiles.py
+recodevideofiles.py
+*.7z
 
+# Video file formats
 *.mp4
+*.webm
+*.mkv
+*.mov
+
+# Audio file formats
+*.mp3
+*.ogg
+*.wav
+*.flac
 
 # Repository-specific - only allow these video and audio sources
-!VideoSources/DOOR STUCK! DOOR STUCK!.mp4
-!VideoSources/FUS RO DAH!!!.mp4
-!VideoSources/Me at the zoo.mp4
-!AudioSources/BOOM.mp3
-!AudioSources/Bruh Sound Effect #2.mp3
-!AudioSources/Damn Son.mp3
+!input_video_sources/DOOR STUCK! DOOR STUCK!.mp4
+!input_video_sources/FUS RO DAH!!!.mp4
+!input_video_sources/Me at the zoo.mp4
+!input_audio_sources/BOOM.mp3
+!input_audio_sources/Bruh Sound Effect #2.mp3
+!input_audio_sources/Damn Son.mp3
+
+# Linux
+.directory
 
 # Visual Studio Code
 *.code-workspace
+
+#
+# GitHub Python .gitignore
+#
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
