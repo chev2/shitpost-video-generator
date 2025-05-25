@@ -233,6 +233,9 @@ finalVideoFilename = f'output/result_seed-{seed}_{videoAmount}{"_effects" if sho
 # Create output directory if it doesn't exist
 if not path.exists("output"): mkdir("output")
 
+print("")
+print("Rendering final video...")
+print("")
 finalVideo.audio = editor.CompositeAudioClip([finalVideo.audio] + audioObjects)
 finalVideo.write_videofile(finalVideoFilename, fps=30, audio_bitrate="96k")
 
