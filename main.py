@@ -247,12 +247,18 @@ for index, audio in enumerate(randomSounds):
         for i in range(rng.randint(1, 5)):
             copiedSoundAmount += 1
 
-            # Max 0 and clip position - 2 so it doesn't go into negative clip position (if near beginning of video)
+            dupe_clip_position = clipPosition + ((i * 0.4) * rng.uniform(0.8, 1.2))
+            # If the duplicate clip goes over the final video duration, simply discard that duplicate clip
+            if dupe_clip_position > finalVideo.duration:
+                continue
+
+            """# Max 0 and clip position - 2 so it doesn't go into negative clip position (if near beginning of video)
             minimumRange = max(0, clipPosition - 2)
             # Minimum between final video duration and clip position + 2 so it doesn't go over video length (if near end of video)
             maximumRange = min(finalVideo.duration, clipPosition + 2) - newClip.duration
 
-            copiedClip = newClip.set_start(rng.uniform(minimumRange, maximumRange)) # move audio around video length
+            copiedClip = newClip.set_start(rng.uniform(minimumRange, maximumRange)) # move audio around video length"""
+            copiedClip = newClip.set_start(dupe_clip_position)
             audioObjects.append(copiedClip)
 
 print(f"Compiling {audioAmount} sounds... {get_progress_bar_str(1, 1, progress_bar_len=40)}")
