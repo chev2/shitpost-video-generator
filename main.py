@@ -206,7 +206,7 @@ print("Finished compiling videos.")
 
 finalVideo = editor.concatenate_videoclips(videoObjects, method="compose") # method="compose"
 
-audioAmount = int(videoAmount*audio_multiplier)
+audioAmount = int(videoAmount*AUDIO_AMOUNT_MULTIPLIER)
 
 randomSounds = rng.sample(audioFiles, min(audioAmount, len(audioFiles)))
 
