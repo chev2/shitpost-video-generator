@@ -49,17 +49,18 @@ random_speed_amount = (0.7, 3)
 #float. default: 0.3, 2
 contrast_amount = (0.3, 2)
 
-chosenSeed = input("Video seed (or 'any' to use system time): ")
+chosenSeed = input("Video seed (or 'any' to pick one automatically): ")
 while not chosenSeed.isdecimal() and not chosenSeed in ["any", "skip", "default", "time"]:
-    chosenSeed = input("Video seed (or 'any' to use system time): ")
+    chosenSeed = input("Video seed (or 'any' to pick one automatically): ")
 
 seed = int(chosenSeed) if chosenSeed.isdecimal() else random.randrange(maxsize) #get a chosen or random seed to use and reference later
 
-print(f'Chose seed: {seed}')
+print(f"Chose seed: {seed}")
 
 rng = random.Random(seed)
 
-print(f'Found {len(videoFiles)} videos and {len(audioFiles)} sounds')
+print("")
+print(f"Found {len(videoFiles)} videos and {len(audioFiles)} sounds")
 
 # Returns a progress bar string, useful for measuring progress in command-line
 def ProgressBar(current_index, max_index, progress_bar_len:int = 20, include_percent:bool = True, percent_digits:int = 2,
@@ -169,10 +170,11 @@ randomVideos = rng.sample(videoFiles, min(videoAmount, len(videoFiles)))
 #randomVideos = rng.choices(videoFiles, k=min(videoAmount, len(videoFiles)))
 if videoAmount > len(videoFiles): #if there is a higher chosen amount than total, re-use videos
     videoAmountToAdd = videoAmount - len(videoFiles)
-    print(f'Chosen video amount is higher than available video amount - re-using {videoAmountToAdd} videos...')
+    print(f"Chosen video amount is higher than available video amount - re-using {videoAmountToAdd} videos...")
     additionalVideos = rng.choices(videoFiles, k=videoAmountToAdd)
     randomVideos += additionalVideos
 
+print("")
 print(f"Compiling {videoAmount} videos... ", end="\r")
 
 for index, video in enumerate(randomVideos):
@@ -201,10 +203,11 @@ randomSounds = rng.sample(audioFiles, min(audioAmount, len(audioFiles)))
 
 if audioAmount > len(audioFiles):
     audioAmountToAdd = audioAmount - len(audioFiles)
-    print(f'Chosen audio amount is higher than available audio amount - re-using {audioAmountToAdd} audio sources...')
+    print(f"Chosen audio amount is higher than available audio amount - re-using {audioAmountToAdd} audio sources...")
     additionalAudio = rng.choices(audioFiles, k=audioAmountToAdd)
     randomSounds += additionalAudio
 
+print("")
 print(f"Compiling {audioAmount} sounds...", end="\r")
 
 copiedSoundAmount = 0
@@ -245,7 +248,7 @@ print(f"Compiling {audioAmount} sounds... {ProgressBar(1, 1, progress_bar_len=40
 print(f"Finished compiling audio. Added {copiedSoundAmount} duplicate sounds, total {audioAmount+copiedSoundAmount}.")
 
 # The video's filename
-finalVideoFilename = f'output/result_seed-{seed}_{videoAmount}{"_effects" if shouldUseEffects else ""}.mp4'
+finalVideoFilename = f"output/result_seed-{seed}_{videoAmount}{'_effects' if shouldUseEffects else ''}.mp4"
 
 # Create output directory if it doesn't exist
 if not path.exists("output"): mkdir("output")
