@@ -74,8 +74,10 @@ def get_progress_bar_str(current_index, max_index, progress_bar_len:int = 20, in
     return symbol_begin + (symbol_middle * percent_done + " " * (progress_bar_len - percent_done)) + symbol_end + percentage
 
 def ContinuousFlipVideo(clip): #flip a video multiple times over its duration
-    flip_amt = rng.randint(*continuous_flip_amount) #how many times the clip will be flipped
-    flip_periods = [rng.uniform(0, clip.duration) for _ in range(flip_amt)] #random periods at which to shuffle
+    #how many times the clip will be flipped
+    flip_amt = rng.randint(*continuous_flip_amount)
+    #random periods at which to shuffle
+    flip_periods = [rng.uniform(0, clip.duration) for _ in range(flip_amt)]
 
     flip_periods.sort() #in ascending order
     all_clips = []
@@ -108,8 +110,10 @@ def RepeatVideo(clip): #repeat a video multiple times
     return final_clip
 
 def ShuffleVideo(clip): #take a clip, split it into multiple parts, shuffle those parts
-    shuffle_amt = rng.randint(*shuffle_video_amount) #how many times the clip will be split and shuffled
-    shuffle_periods = [rng.uniform(0, clip.duration) for _ in range(shuffle_amt)] #random periods at which to shuffle
+    #how many times the clip will be split and shuffled
+    shuffle_amt = rng.randint(*shuffle_video_amount)
+    #random periods at which to shuffle
+    shuffle_periods = [rng.uniform(0, clip.duration) for _ in range(shuffle_amt)]
 
     shuffle_periods.sort() #in ascending order
     all_clips = []
@@ -219,8 +223,10 @@ for index, audio in enumerate(randomSounds):
 
     if newClip.duration > 5: #for long clips
         randomDuration = rng.uniform(*audio_clip_times) # crop audio duration
-        if newClip.duration > randomDuration: # if the audio is longer than the cropped duration, crop the audio at a random position
-            startOffset = rng.choice([rng.uniform(0, newClip.duration - randomDuration), 0]) #either use a random offset, or start at beginning of audio clip
+        # if the audio is longer than the cropped duration, crop the audio at a random position
+        if newClip.duration > randomDuration:
+            #either use a random offset, or start at beginning of audio clip
+            startOffset = rng.choice([rng.uniform(0, newClip.duration - randomDuration), 0])
             newClip = newClip.subclip(startOffset, startOffset+randomDuration)
 
         newClip = newClip.set_start(rng.uniform(0, finalVideo.duration-newClip.duration)) # move audio around video length
