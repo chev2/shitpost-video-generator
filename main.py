@@ -7,6 +7,7 @@ from os import listdir, mkdir, path
 import moviepy.audio
 from moviepy import editor
 from moviepy.video import fx
+from moviepy.video.fx import resize
 
 """
     TODO:
@@ -187,17 +188,18 @@ print(f"Compiling {videoAmount} videos... ", end="\r")
 for index, video in enumerate(randomVideos):
     print(f"Compiling {videoAmount} videos... {get_progress_bar_str(index, len(randomVideos), progress_bar_len=40)}", end="\r")
 
-    newClip = editor.VideoFileClip(video).resize(height=480) #target_resolution=(512, 512)
+    newClip = editor.VideoFileClip(video)
+    sizedClip = fx.resize.resize(newClip, height=480)
 
     randomDuration = rng.uniform(*video_clip_times)
-    if newClip.duration > randomDuration:
-        startOffset = rng.uniform(0, newClip.duration - randomDuration)
-        newClip = newClip.subclip(startOffset, startOffset+randomDuration)
+    if sizedClip.duration > randomDuration:
+        startOffset = rng.uniform(0, sizedClip.duration - randomDuration)
+        sizedClip = sizedClip.subclip(startOffset, startOffset+randomDuration)
 
     if rng.choice([True, True, False]) and shouldUseEffects:
-        newClip = rng.choice(videoEffects)(newClip) #apply a random effect
+        sizedClip = rng.choice(videoEffects)(sizedClip) #apply a random effect
 
-    videoObjects.append(newClip)
+    videoObjects.append(sizedClip)
 
 print(f"Compiling {videoAmount} videos... {get_progress_bar_str(1, 1, progress_bar_len=40)}")
 print("Finished compiling videos.")
