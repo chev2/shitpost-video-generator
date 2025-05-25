@@ -5,32 +5,49 @@ from os import listdir, mkdir, path
 from moviepy import editor
 from moviepy.video import fx
 
-'''
+"""
     TODO:
         flash random images in short bursts at long intervals
         try to overlap videos more and distort them
         spread out audio duplication a bit, so they don't end up directly next to one another
+"""
 
-'''
+VIDEO_SOURCE_FOLDER = "input_video_sources"
+AUDIO_SOURCE_FOLDER = "input_audio_sources"
 
-videoSourceFolder = "input_video_sources"
-audioSourceFolder = "input_audio_sources"
+videoFiles = [VIDEO_SOURCE_FOLDER + "/" + vid for vid in listdir(VIDEO_SOURCE_FOLDER)]
+audioFiles = [AUDIO_SOURCE_FOLDER + "/" + vid for vid in listdir(AUDIO_SOURCE_FOLDER)]
 
-videoFiles = [videoSourceFolder + "/" + vid for vid in listdir(videoSourceFolder)]
-audioFiles = [audioSourceFolder + "/" + vid for vid in listdir(audioSourceFolder)]
+# All video clips will be trimmed to be between these two lengths
+# default: 0.5, 3.5 | chaos: 0.3, 1.2
+video_clip_times = (0.4, 0.8)
+# All audio clips will be trimemd to be between these two lengths
+# default: 0.7, 13. chaos: 0.7, 3.0
+audio_clip_times = (0.7, 3.0)
 
-video_clip_times = (1.0, 2.5) #default: 0.5, 3.5. chaos: 0.3, 1.2
-audio_clip_times = (0.7, 3) #default: 0.7, 13. chaos: 0.7, 3.0
+# Audio amount multiplier (based off the amount of videos)
+# e.g. 60 videos with a multiplier of 0.75 means 45 audio clips will be put into the final result.
+# default: 0.75. chaos: 1.5
+AUDIO_AMOUNT_MULTIPLIER = 1.5
 
-audio_multiplier = 1.5 #audio amount multiplier (based off the amount of videos), e.g. 60 videos with a multiplier of 0.75 means 45 audio cues. default: 0.75. chaos: 1.5
+# (min, max) random values range, inclusive
+#integer. default: 1, 7
+continuous_flip_amount = (1, 7)
 
-#(min, max) random values range, inclusive
-continuous_flip_amount = (7, 14) #integer. default: 1, 7
-repeat_video_amount = (0.01, 0.2) #float. default: 0.01, 0.2
-shuffle_video_amount = (20, 50) #integer. default: 20, 50
-flip_rotation_amount = (1, 4) #integer. default: 1, 4
-random_speed_amount = (0.7, 3) #float. default: 0.7, 3
-contrast_amount = (0.3, 2) #float. default: 0.3, 2
+#float. default: 0.01, 0.2
+repeat_video_amount = (0.01, 0.2)
+
+#integer. default: 20, 50
+shuffle_video_amount = (20, 50)
+
+#integer. default: 1, 4
+flip_rotation_amount = (1, 4)
+
+#float. default: 0.7, 3
+random_speed_amount = (0.7, 3)
+
+#float. default: 0.3, 2
+contrast_amount = (0.3, 2)
 
 chosenSeed = input("Video seed (or 'any' to use system time): ")
 while not chosenSeed.isdecimal() and not chosenSeed in ["any", "skip", "default", "time"]:
