@@ -63,7 +63,7 @@ print("")
 print(f"Found {len(videoFiles)} videos and {len(audioFiles)} sounds")
 
 # Returns a progress bar string, useful for measuring progress in command-line
-def ProgressBar(current_index, max_index, progress_bar_len:int = 20, include_percent:bool = True, percent_digits:int = 2,
+def get_progress_bar_str(current_index, max_index, progress_bar_len:int = 20, include_percent:bool = True, percent_digits:int = 2,
                 symbol_middle:str = "█", symbol_begin:str = "|", symbol_end:str = "|"):
     # Used for the progress bar - gets progress 0-1 range,
     # then multiplies it by the progress bar length
@@ -178,7 +178,7 @@ print("")
 print(f"Compiling {videoAmount} videos... ", end="\r")
 
 for index, video in enumerate(randomVideos):
-    print(f"Compiling {videoAmount} videos... {ProgressBar(index, len(randomVideos), progress_bar_len=40)}", end="\r")
+    print(f"Compiling {videoAmount} videos... {get_progress_bar_str(index, len(randomVideos), progress_bar_len=40)}", end="\r")
 
     newClip = editor.VideoFileClip(video).resize(height=480) #target_resolution=(512, 512)
 
@@ -192,7 +192,7 @@ for index, video in enumerate(randomVideos):
 
     videoObjects.append(newClip)
 
-print(f"Compiling {videoAmount} videos... {ProgressBar(1, 1, progress_bar_len=40)}")
+print(f"Compiling {videoAmount} videos... {get_progress_bar_str(1, 1, progress_bar_len=40)}")
 print("Finished compiling videos.")
 
 finalVideo = editor.concatenate_videoclips(videoObjects, method="compose") # method="compose"
@@ -212,7 +212,7 @@ print(f"Compiling {audioAmount} sounds...", end="\r")
 
 copiedSoundAmount = 0
 for index, audio in enumerate(randomSounds):
-    print(f"Compiling {audioAmount} sounds... {ProgressBar(index, len(randomSounds), progress_bar_len=40)}", end="\r")
+    print(f"Compiling {audioAmount} sounds... {get_progress_bar_str(index, len(randomSounds), progress_bar_len=40)}", end="\r")
 
     newClip = editor.AudioFileClip(audio)
     newClip = moviepy.audio.fx.volumex.volumex(newClip, 0.8) # modify volume
@@ -244,7 +244,7 @@ for index, audio in enumerate(randomSounds):
             copiedClip = newClip.set_start(rng.uniform(minimumRange, maximumRange)) # move audio around video length
             audioObjects.append(copiedClip)
 
-print(f"Compiling {audioAmount} sounds... {ProgressBar(1, 1, progress_bar_len=40)}")
+print(f"Compiling {audioAmount} sounds... {get_progress_bar_str(1, 1, progress_bar_len=40)}")
 print(f"Finished compiling audio. Added {copiedSoundAmount} duplicate sounds, total {audioAmount+copiedSoundAmount}.")
 
 # The video's filename
