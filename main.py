@@ -1,7 +1,10 @@
-import moviepy.audio
+# Standard modules
 import random
 from sys import maxsize
 from os import listdir, mkdir, path
+
+# MoviePy modules
+import moviepy.audio
 from moviepy import editor
 from moviepy.video import fx
 
