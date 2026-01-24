@@ -53,7 +53,7 @@ random_speed_amount = (0.7, 3)
 contrast_amount = (0.3, 2)
 
 chosenSeed = input("Video seed (or 'any' to pick one automatically): ")
-while not chosenSeed.isdecimal() and not chosenSeed in ["any", "skip", "default", "time"]:
+while not chosenSeed.isdecimal() and chosenSeed not in ("any", "skip", "default", "time"):
     chosenSeed = input("Video seed (or 'any' to pick one automatically): ")
 
 seed = int(chosenSeed) if chosenSeed.isdecimal() else random.randrange(maxsize) #get a chosen or random seed to use and reference later
@@ -191,10 +191,10 @@ while not videoAmount.isdecimal():
 videoAmount = int(videoAmount)
 
 shouldUseEffects = input("Apply video effects? (y/n): ")
-while not shouldUseEffects.lower() in ["y", "yes", "true", "n", "no", "false"]:
+while shouldUseEffects.lower() not in ("y", "yes", "true", "n", "no", "false"):
     shouldUseEffects = input("Apply video effects? (y/n): ")
 
-shouldUseEffects = True if shouldUseEffects.lower() in ["y", "yes", "true"] else False
+shouldUseEffects = True if shouldUseEffects.lower() in ("y", "yes", "true") else False
 
 randomVideos = rng.sample(videoFiles, min(videoAmount, len(videoFiles)))
 #randomVideos = rng.choices(videoFiles, k=min(videoAmount, len(videoFiles)))
