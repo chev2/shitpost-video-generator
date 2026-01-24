@@ -4,12 +4,11 @@ from sys import maxsize
 from os import listdir, mkdir, path
 
 # MoviePy modules
-import moviepy.audio
-from moviepy import editor
-from moviepy.video import fx
-from moviepy.video.fx import resize
+from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips, Effect, vfx
+from moviepy.Clip import Clip
 
 """
+
     TODO:
         flash random images in short bursts at long intervals
         try to overlap videos more and distort them
@@ -77,86 +76,109 @@ def get_progress_bar_str(current_index, max_index, progress_bar_len:int = 20, in
 
     return symbol_begin + (symbol_middle * percent_done + " " * (progress_bar_len - percent_done)) + symbol_end + percentage
 
-def ContinuousFlipVideo(clip): #flip a video multiple times over its duration
-    #how many times the clip will be flipped
-    flip_amt = rng.randint(*continuous_flip_amount)
-    #random periods at which to shuffle
-    flip_periods = [rng.uniform(0, clip.duration) for _ in range(flip_amt)]
+class ContinuousFlipVideo(Effect):
+    def apply(self, clip: Clip): #flip a video multiple times over its duration
+        #how many times the clip will be flipped
+        flip_amt = rng.randint(*continuous_flip_amount)
+        #random periods at which to shuffle
+        flip_periods = [rng.uniform(0, clip.duration) for _ in range(flip_amt)]
 
-    flip_periods.sort() #in ascending order
-    all_clips = []
-    last_period = 0
+        flip_periods.sort() #in ascending order
+        all_clips = []
+        last_period = 0
 
-    for period in flip_periods:
-        new_clip = clip.subclip(last_period, period)
+        for period in flip_periods:
+            new_clip = clip.subclipped(last_period, period)
+            all_clips.append(new_clip)
+            last_period = period
+
+        new_clip = clip.subclipped(last_period, clip.duration)
         all_clips.append(new_clip)
-        last_period = period
 
-    new_clip = clip.subclip(last_period, clip.duration)
-    all_clips.append(new_clip)
+        for i in range(len(all_clips)):
+            # Either flip on the X, or Y, or don't flip at all
+            effect_to_use = rng.choice((vfx.MirrorX(), vfx.MirrorY(), None))
 
-    for i in range(len(all_clips)):
-        clip = all_clips[i]
-        all_clips[i] = rng.choice([fx.mirror_x.mirror_x, fx.mirror_y.mirror_y, lambda v: v])(all_clips[i]) #flip on the x, or y, or don't flip
+            if effect_to_use is not None:
+                all_clips[i] = all_clips[i].with_effects((effect_to_use,))
 
-    final_clip = editor.concatenate_videoclips(all_clips)
+        final_clip = concatenate_videoclips(all_clips)
 
-    return final_clip
+        return final_clip
 
-def RepeatVideo(clip): #repeat a video multiple times
-    random_dur = rng.uniform(*repeat_video_amount)
-    repeat_amt = int((clip.duration/random_dur)*0.5)
+class RepeatMultiple(Effect):
+    def apply(self, clip: Clip) -> Clip: #repeat a video multiple times
+        random_dur = rng.uniform(*repeat_video_amount)
+        repeat_amt = int((clip.duration / random_dur) * 0.5)
 
-    start_offset = rng.uniform(0, clip.duration - random_dur)
-    new_clip = clip.subclip(start_offset, start_offset+random_dur)
+        start_offset = rng.uniform(0, clip.duration - random_dur)
+        new_clip = clip.subclipped(start_offset, start_offset + random_dur)
 
-    final_clip = editor.concatenate_videoclips([new_clip]*repeat_amt)
-    return final_clip
+        final_clip = concatenate_videoclips([new_clip]*repeat_amt)
+        return final_clip
 
-def ShuffleVideo(clip): #take a clip, split it into multiple parts, shuffle those parts
-    #how many times the clip will be split and shuffled
-    shuffle_amt = rng.randint(*shuffle_video_amount)
-    #random periods at which to shuffle
-    shuffle_periods = [rng.uniform(0, clip.duration) for _ in range(shuffle_amt)]
+# take a clip, split it into multiple parts, shuffle those parts
+class ShuffleVideo(Effect):
+    def apply(self, clip: Clip):
+        #how many times the clip will be split and shuffled
+        shuffle_amt = rng.randint(*shuffle_video_amount)
+        #random periods at which to shuffle
+        shuffle_periods = [rng.uniform(0, clip.duration) for _ in range(shuffle_amt)]
 
-    shuffle_periods.sort() #in ascending order
-    all_clips = []
-    last_period = 0
+        shuffle_periods.sort() #in ascending order
+        all_clips = []
+        last_period = 0
 
-    for period in shuffle_periods:
-        new_clip = clip.subclip(last_period, period)
+        for period in shuffle_periods:
+            new_clip = clip.subclipped(last_period, period)
+            all_clips.append(new_clip)
+            last_period = period
+
+        new_clip = clip.subclipped(last_period, clip.duration)
         all_clips.append(new_clip)
-        last_period = period
+        rng.shuffle(all_clips) #shuffle around the clips to get the final result
+        final_clip = concatenate_videoclips(all_clips)
 
-    new_clip = clip.subclip(last_period, clip.duration)
-    all_clips.append(new_clip)
-    rng.shuffle(all_clips) #shuffle around the clips to get the final result
-    final_clip = editor.concatenate_videoclips(all_clips)
+        return final_clip
 
-    return final_clip
+# makes the clip "rotate" by flipping and reversing the second part of the clip
+class FlipRotationVideo(Effect):
+    def apply(self, clip: Clip):
+        random_duration = rng.uniform(0.1, 0.3)
 
-def FlipRotationVideo(clip): #makes the clip "rotate" by flipping and reversing the second part of the clip
-    random_duration = rng.uniform(0.1, 0.3)
+        start_offset = rng.uniform(0, clip.duration - random_duration)
+        first_clip = clip.subclipped(start_offset, start_offset+random_duration)
 
-    start_offset = rng.uniform(0, clip.duration - random_duration)
-    first_clip = clip.subclip(start_offset, start_offset+random_duration)
+        # Flip horizontal, then reverse video
+        second_clip = first_clip.copy().with_effects((vfx.MirrorX(), vfx.TimeMirror()))
 
-    second_clip = fx.time_mirror.time_mirror(fx.mirror_x.mirror_x(first_clip.copy())) #flip horizontal, then reverse video
+        # Speed up the clips
+        first_clip = first_clip.with_effects((vfx.MultiplySpeed(1.5),))
+        second_clip = second_clip.with_effects((vfx.MultiplySpeed(1.5),))
 
-    both_clips = [fx.speedx.speedx(first_clip, 1.5), fx.speedx.speedx(second_clip, 1.5)]
+        # Number of times to do this flip-rotation
+        flip_rotation_count = random.randint(*flip_rotation_amount)
 
-    return editor.concatenate_videoclips(both_clips*random.randint(*flip_rotation_amount))
+        return concatenate_videoclips([first_clip, second_clip] * flip_rotation_count)
 
 videoEffects = [
-    lambda v: fx.speedx.speedx(v, rng.uniform(*random_speed_amount)), #speed up/slow down
-    lambda v: fx.mirror_x.mirror_x(v), #mirror on the x axis
-    lambda v: fx.time_mirror.time_mirror(v), #reverse the video
-    lambda v: v.fx(fx.time_symmetrize.time_symmetrize).fx(fx.speedx.speedx, factor=rng.uniform(1.4, 2.3)), #forward + reverse with speed up
-    lambda v: RepeatVideo(v), #repeat the video multiple times
-    lambda v: ShuffleVideo(v), #shuffle up parts of the video for a glitch-like effect
-    lambda v: ContinuousFlipVideo(v), #flip the video on the x and y axis multiple times
-    lambda v: FlipRotationVideo(v),
-    lambda v: fx.lum_contrast.lum_contrast(v, lum=0, contrast=rng.uniform(*contrast_amount)) #change contrast
+    # Speed up or slow down
+    (vfx.MultiplySpeed(rng.uniform(*random_speed_amount)),),
+    # Mirror horizontally
+    (vfx.MirrorX(),),
+    # Reverse the video
+    (vfx.TimeMirror(),),
+    # 1. Play the clip forwards and then backwards
+    # 2. Speed up both clips a bit
+    (vfx.TimeSymmetrize(), vfx.MultiplySpeed(rng.uniform(1.4, 2.3))),
+    # Change contrast
+    (vfx.LumContrast(lum=0, contrast=rng.uniform(*contrast_amount)),),
+    # Continuously repeat the video
+    (RepeatMultiple(),),
+    # Flip the video on the x and y axis multiple times
+    (ContinuousFlipVideo(),),
+    (ShuffleVideo(),),
+    (FlipRotationVideo(),)
 ]
 
 videoObjects = []
@@ -188,23 +210,26 @@ print(f"Compiling {videoAmount} videos... ", end="\r")
 for index, video in enumerate(randomVideos):
     print(f"Compiling {videoAmount} videos... {get_progress_bar_str(index, len(randomVideos), progress_bar_len=40)}", end="\r")
 
-    newClip = editor.VideoFileClip(video)
-    sizedClip = fx.resize.resize(newClip, height=480)
+    newClip = VideoFileClip(video)
+    sizedClip = newClip.with_effects([vfx.Resize(height=480)])
 
     randomDuration = rng.uniform(*video_clip_times)
     if sizedClip.duration > randomDuration:
         startOffset = rng.uniform(0, sizedClip.duration - randomDuration)
-        sizedClip = sizedClip.subclip(startOffset, startOffset+randomDuration)
+        sizedClip = sizedClip.subclipped(startOffset, startOffset+randomDuration)
 
     if rng.choice([True, True, False]) and shouldUseEffects:
-        sizedClip = rng.choice(videoEffects)(sizedClip) #apply a random effect
+        # Apply a random effect to this video
+        effect_to_use = rng.choice(videoEffects)
+
+        sizedClip = sizedClip.with_effects(effect_to_use)
 
     videoObjects.append(sizedClip)
 
 print(f"Compiling {videoAmount} videos... {get_progress_bar_str(1, 1, progress_bar_len=40)}")
 print("Finished compiling videos.")
 
-finalVideo = editor.concatenate_videoclips(videoObjects, method="compose") # method="compose"
+finalVideo = concatenate_videoclips(videoObjects, method="compose") # method="compose"
 
 audioAmount = int(videoAmount*AUDIO_AMOUNT_MULTIPLIER)
 
@@ -223,8 +248,10 @@ copiedSoundAmount = 0
 for index, audio in enumerate(randomSounds):
     print(f"Compiling {audioAmount} sounds... {get_progress_bar_str(index, len(randomSounds), progress_bar_len=40)}", end="\r")
 
-    newClip = editor.AudioFileClip(audio)
-    newClip = moviepy.audio.fx.volumex.volumex(newClip, 0.8) # modify volume
+    newClip = AudioFileClip(audio)
+    # Modify the volume of audio clips so that they (hopefully) won't drown out
+    #  the audio coming from the video clips
+    newClip = newClip.with_volume_scaled(0.6)
 
     if newClip.duration > 5: #for long clips
         randomDuration = rng.uniform(*audio_clip_times) # crop audio duration
@@ -232,22 +259,22 @@ for index, audio in enumerate(randomSounds):
         if newClip.duration > randomDuration:
             #either use a random offset, or start at beginning of audio clip
             startOffset = rng.choice([rng.uniform(0, newClip.duration - randomDuration), 0])
-            newClip = newClip.subclip(startOffset, startOffset+randomDuration)
+            newClip = newClip.subclipped(startOffset, startOffset+randomDuration)
 
-        newClip = newClip.set_start(rng.uniform(0, finalVideo.duration-newClip.duration)) # move audio around video length
+        newClip = newClip.with_start(rng.uniform(0, finalVideo.duration-newClip.duration)) # move audio around video length
         audioObjects.append(newClip)
     else:
         # Place to position the audio clip - could be anywhere from the final video's start all the way to its full duration
-        clipPosition = rng.uniform(0, finalVideo.duration-newClip.duration)
+        clipPosition = rng.uniform(0, finalVideo.duration - newClip.duration)
 
-        newClip = newClip.set_start(clipPosition) # move audio around video length
+        newClip = newClip.with_start(clipPosition) # move audio around video length
         audioObjects.append(newClip)
 
         # Add duplicates of this audio clip
         for i in range(rng.randint(1, 5)):
             copiedSoundAmount += 1
 
-            dupe_clip_position = clipPosition + ((i * 0.4) * rng.uniform(0.8, 1.2))
+            dupe_clip_position = clipPosition + ((i * 0.9) * rng.uniform(0.8, 1.2))
             # If the duplicate clip goes over the final video duration, simply discard that duplicate clip
             if dupe_clip_position > finalVideo.duration:
                 continue
@@ -257,8 +284,8 @@ for index, audio in enumerate(randomSounds):
             # Minimum between final video duration and clip position + 2 so it doesn't go over video length (if near end of video)
             maximumRange = min(finalVideo.duration, clipPosition + 2) - newClip.duration
 
-            copiedClip = newClip.set_start(rng.uniform(minimumRange, maximumRange)) # move audio around video length"""
-            copiedClip = newClip.set_start(dupe_clip_position)
+            copiedClip = newClip.with_start(rng.uniform(minimumRange, maximumRange)) # move audio around video length"""
+            copiedClip = newClip.with_start(dupe_clip_position)
             audioObjects.append(copiedClip)
 
 print(f"Compiling {audioAmount} sounds... {get_progress_bar_str(1, 1, progress_bar_len=40)}")
@@ -268,12 +295,13 @@ print(f"Finished compiling audio. Added {copiedSoundAmount} duplicate sounds, to
 finalVideoFilename = f"output/result_seed-{seed}_{videoAmount}{'_effects' if shouldUseEffects else ''}.mp4"
 
 # Create output directory if it doesn't exist
-if not path.exists("output"): mkdir("output")
+if not path.exists("output"):
+    mkdir("output")
 
 print("")
 print("Rendering final video...")
 print("")
-finalVideo.audio = editor.CompositeAudioClip([finalVideo.audio] + audioObjects)
+finalVideo.audio = CompositeAudioClip([finalVideo.audio] + audioObjects)
 finalVideo.write_videofile(finalVideoFilename, fps=30, audio_bitrate="96k")
 
 # Close all file streams
