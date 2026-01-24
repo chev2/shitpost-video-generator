@@ -12,20 +12,33 @@ Here's how it works:
 7. The merged video clip & merged audio clip is then merged together to produce the final result, which is put into the `output/` directory.
 
 ## Requirements
-Python `3.8` or greater is required. This project has been tested on Python `3.8` and `3.11`.
+Python `3.9` or greater is required. This project has been tested on Python `3.11`.
 
-Installing dependencies:
-1. Install the latest version of MoviePy: `pip install -U moviepy`
-2. **Workaround 2023-07-17**: There is currently an incompatibility with Pillow and MoviePy's video.resize() method, so you'll have to downgrade Pillow for the time being: `pip install Pillow==9.5.0`
-3. That's all! You should be able to run the main script just fine now: `python3 main.py`
+### uv
+
+**uv** is the recommended installation method. You can find how to install uv [here](https://docs.astral.sh/uv/getting-started/installation/).
+
+After uv is installed, simply run `uv run main.py` in whatever folder you downloaded this from. That's all!
+
+### pip
+
+If you'd prefer to use traditional pip/venv:
+
+1. Ensure you're using a compatible Python version: `python --version`
+2. Remove any existing virtual environment if it exists. (Usually `venv/` or `.venv/`)
+3. Create a new virtual environment: `python -m pip venv venv`
+4. Activate the virtual environment: `source venv/bin/activate`
+5. Install MoviePy: `pip install moviepy==2.2.1`
+6. Run the script with `python main.py`
 
 ## How to use
-Please take a look at the **requirements** above before following these steps.
+Please take a look at the **requirements** above before following these steps. **uv** is the recommended install method.
 
-1. Put a list of desired video sources into the `input_video_sources/` directory, and a list of desired audio sources into the `input_audio_sources` directory. I recommend keeping the video file formats the same, but it shouldn't matter. The resolution of videos does not matter, either.
-2. Run the script (`python3 main.py`), and choose a seed if you want to reproduce the same video. Otherwise, type 'any' to choose a random seed.
-3. Choose the amount of videos you want the script to merge together to produce the final result. I recommend 30 for roughly minute-long videos.
-4. The script will do the rest, and generate the final video in the root directory, which will be formatted as `result_seed-<seed>_<number-of-videos>_<effects-enabled>.mp4`.
+1. Download the GitHub repo (click the green 'code' button, then 'Download ZIP') and extract it somewhere.
+2. Put a list of desired video sources into the `input_video_sources/` directory, and a list of desired audio sources into the `input_audio_sources` directory. I recommend keeping the video file formats the same, but it shouldn't matter. The resolution of videos does not matter, either.
+3. Run the script, and choose a seed if you want to reproduce the same video later. Otherwise, type 'any' to choose a random seed.
+4. Choose the amount of videos you want the script to merge together to produce the final result.
+5. The script will do the rest, and generate the final video in the root directory, which will be formatted as `result_seed-<seed>_<number-of-videos>_<effects-enabled>.mp4`.
 
 ## Performance
 This script uses moviepy - due to the amount of ffmpeg processes moviepy opens from this script, it has really high memory usage. I have seen this script use upwards of about ~2.5GB of memory for 40 random loaded videos. I don't know of a way around this.

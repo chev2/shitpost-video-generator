@@ -1,0 +1,9 @@
+[project]
+name = "shitpost-video-generator"
+version = "0.1.0"
+description = "Takes provided video/audio clips and splices them together at random to produce randomly-generated humor."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "moviepy==2.2.1",
+]
