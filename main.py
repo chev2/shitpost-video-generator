@@ -302,7 +302,15 @@ print("")
 print("Rendering final video...")
 print("")
 finalVideo.audio = CompositeAudioClip([finalVideo.audio] + audioObjects)
-finalVideo.write_videofile(finalVideoFilename, fps=30, audio_bitrate="96k")
+finalVideo.write_videofile(
+    finalVideoFilename,
+    fps=30,
+    preset="faster",
+    codec="libx264",
+    pixel_format="yuv420p",
+    audio_codec="libmp3lame",
+    audio_bitrate="96k"
+)
 
 # Close all file streams
 for video in videoObjects:
