@@ -28,7 +28,7 @@ If you'd prefer to use traditional pip/venv:
 2. Remove any existing virtual environment if it exists. (Usually `venv/` or `.venv/`)
 3. Create a new virtual environment: `python -m pip venv venv`
 4. Activate the virtual environment: `source venv/bin/activate`
-5. Install MoviePy: `pip install moviepy==2.2.1`
+5. Install MoviePy: `pip install moviepy==2.2.1 tqdm`
 6. Run the script with `python main.py`
 
 ## How to use
