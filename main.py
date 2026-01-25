@@ -7,6 +7,9 @@ from os import listdir, mkdir, path
 from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips, Effect, vfx
 from moviepy.Clip import Clip
 
+# Progress bars
+from tqdm import tqdm
+
 """
 
     TODO:
@@ -64,17 +67,6 @@ rng = random.Random(seed)
 
 print("")
 print(f"Found {len(videoFiles)} videos and {len(audioFiles)} sounds")
-
-# Returns a progress bar string, useful for measuring progress in command-line
-def get_progress_bar_str(current_index, max_index, progress_bar_len:int = 20, include_percent:bool = True, percent_digits:int = 2,
-                symbol_middle:str = "█", symbol_begin:str = "|", symbol_end:str = "|"):
-    # Used for the progress bar - gets progress 0-1 range,
-    # then multiplies it by the progress bar length
-    percent_done = int(current_index / max_index * progress_bar_len)
-
-    percentage = f" {round((current_index / max_index) * 100, percent_digits)}%" if include_percent else ""
-
-    return symbol_begin + (symbol_middle * percent_done + " " * (progress_bar_len - percent_done)) + symbol_end + percentage
 
 class ContinuousFlipVideo(Effect):
     def apply(self, clip: Clip): #flip a video multiple times over its duration
@@ -207,26 +199,26 @@ if videoAmount > len(videoFiles): #if there is a higher chosen amount than total
 print("")
 print(f"Compiling {videoAmount} videos... ", end="\r")
 
-for index, video in enumerate(randomVideos):
-    print(f"Compiling {videoAmount} videos... {get_progress_bar_str(index, len(randomVideos), progress_bar_len=40)}", end="\r")
+with tqdm(desc="Compiling videos", total=len(randomVideos)) as pbar:
+    for index, video in enumerate(randomVideos):
+        newClip = VideoFileClip(video)
+        sizedClip = newClip.with_effects([vfx.Resize(height=480)])
 
-    newClip = VideoFileClip(video)
-    sizedClip = newClip.with_effects([vfx.Resize(height=480)])
+        randomDuration = rng.uniform(*video_clip_times)
+        if sizedClip.duration > randomDuration:
+            startOffset = rng.uniform(0, sizedClip.duration - randomDuration)
+            sizedClip = sizedClip.subclipped(startOffset, startOffset+randomDuration)
 
-    randomDuration = rng.uniform(*video_clip_times)
-    if sizedClip.duration > randomDuration:
-        startOffset = rng.uniform(0, sizedClip.duration - randomDuration)
-        sizedClip = sizedClip.subclipped(startOffset, startOffset+randomDuration)
+        if rng.choice([True, True, False]) and shouldUseEffects:
+            # Apply a random effect to this video
+            effect_to_use = rng.choice(videoEffects)
 
-    if rng.choice([True, True, False]) and shouldUseEffects:
-        # Apply a random effect to this video
-        effect_to_use = rng.choice(videoEffects)
+            sizedClip = sizedClip.with_effects(effect_to_use)
 
-        sizedClip = sizedClip.with_effects(effect_to_use)
+        videoObjects.append(sizedClip)
 
-    videoObjects.append(sizedClip)
+        pbar.update(1)
 
-print(f"Compiling {videoAmount} videos... {get_progress_bar_str(1, 1, progress_bar_len=40)}")
 print("Finished compiling videos.")
 
 finalVideo = concatenate_videoclips(videoObjects, method="compose") # method="compose"
@@ -245,50 +237,50 @@ print("")
 print(f"Compiling {audioAmount} sounds...", end="\r")
 
 copiedSoundAmount = 0
-for index, audio in enumerate(randomSounds):
-    print(f"Compiling {audioAmount} sounds... {get_progress_bar_str(index, len(randomSounds), progress_bar_len=40)}", end="\r")
+with tqdm(desc="Compiling sounds", total=len(randomSounds)) as pbar:
+    for index, audio in enumerate(randomSounds):
+        newClip = AudioFileClip(audio)
+        # Modify the volume of audio clips so that they (hopefully) won't drown out
+        #  the audio coming from the video clips
+        newClip = newClip.with_volume_scaled(0.6)
 
-    newClip = AudioFileClip(audio)
-    # Modify the volume of audio clips so that they (hopefully) won't drown out
-    #  the audio coming from the video clips
-    newClip = newClip.with_volume_scaled(0.6)
+        if newClip.duration > 5: #for long clips
+            randomDuration = rng.uniform(*audio_clip_times) # crop audio duration
+            # if the audio is longer than the cropped duration, crop the audio at a random position
+            if newClip.duration > randomDuration:
+                #either use a random offset, or start at beginning of audio clip
+                startOffset = rng.choice([rng.uniform(0, newClip.duration - randomDuration), 0])
+                newClip = newClip.subclipped(startOffset, startOffset+randomDuration)
 
-    if newClip.duration > 5: #for long clips
-        randomDuration = rng.uniform(*audio_clip_times) # crop audio duration
-        # if the audio is longer than the cropped duration, crop the audio at a random position
-        if newClip.duration > randomDuration:
-            #either use a random offset, or start at beginning of audio clip
-            startOffset = rng.choice([rng.uniform(0, newClip.duration - randomDuration), 0])
-            newClip = newClip.subclipped(startOffset, startOffset+randomDuration)
+            newClip = newClip.with_start(rng.uniform(0, finalVideo.duration-newClip.duration)) # move audio around video length
+            audioObjects.append(newClip)
+        else:
+            # Place to position the audio clip - could be anywhere from the final video's start all the way to its full duration
+            clipPosition = rng.uniform(0, finalVideo.duration - newClip.duration)
 
-        newClip = newClip.with_start(rng.uniform(0, finalVideo.duration-newClip.duration)) # move audio around video length
-        audioObjects.append(newClip)
-    else:
-        # Place to position the audio clip - could be anywhere from the final video's start all the way to its full duration
-        clipPosition = rng.uniform(0, finalVideo.duration - newClip.duration)
+            newClip = newClip.with_start(clipPosition) # move audio around video length
+            audioObjects.append(newClip)
 
-        newClip = newClip.with_start(clipPosition) # move audio around video length
-        audioObjects.append(newClip)
+            # Add duplicates of this audio clip
+            for i in range(rng.randint(1, 5)):
+                copiedSoundAmount += 1
 
-        # Add duplicates of this audio clip
-        for i in range(rng.randint(1, 5)):
-            copiedSoundAmount += 1
+                dupe_clip_position = clipPosition + ((i * 0.9) * rng.uniform(0.8, 1.2))
+                # If the duplicate clip goes over the final video duration, simply discard that duplicate clip
+                if dupe_clip_position > finalVideo.duration:
+                    continue
 
-            dupe_clip_position = clipPosition + ((i * 0.9) * rng.uniform(0.8, 1.2))
-            # If the duplicate clip goes over the final video duration, simply discard that duplicate clip
-            if dupe_clip_position > finalVideo.duration:
-                continue
+                """# Max 0 and clip position - 2 so it doesn't go into negative clip position (if near beginning of video)
+                minimumRange = max(0, clipPosition - 2)
+                # Minimum between final video duration and clip position + 2 so it doesn't go over video length (if near end of video)
+                maximumRange = min(finalVideo.duration, clipPosition + 2) - newClip.duration
 
-            """# Max 0 and clip position - 2 so it doesn't go into negative clip position (if near beginning of video)
-            minimumRange = max(0, clipPosition - 2)
-            # Minimum between final video duration and clip position + 2 so it doesn't go over video length (if near end of video)
-            maximumRange = min(finalVideo.duration, clipPosition + 2) - newClip.duration
+                copiedClip = newClip.with_start(rng.uniform(minimumRange, maximumRange)) # move audio around video length"""
+                copiedClip = newClip.with_start(dupe_clip_position)
+                audioObjects.append(copiedClip)
 
-            copiedClip = newClip.with_start(rng.uniform(minimumRange, maximumRange)) # move audio around video length"""
-            copiedClip = newClip.with_start(dupe_clip_position)
-            audioObjects.append(copiedClip)
+        pbar.update(1)
 
-print(f"Compiling {audioAmount} sounds... {get_progress_bar_str(1, 1, progress_bar_len=40)}")
 print(f"Finished compiling audio. Added {copiedSoundAmount} duplicate sounds, total {audioAmount+copiedSoundAmount}.")
 
 # The video's filename

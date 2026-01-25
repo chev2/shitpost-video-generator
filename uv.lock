@@ -416,10 +416,14 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "moviepy" },
+    { name = "tqdm" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "moviepy", specifier = "==2.2.1" }]
+requires-dist = [
+    { name = "moviepy", specifier = "==2.2.1" },
+    { name = "tqdm", specifier = ">=4.67.1" },
+]
 
 [[package]]
 name = "tqdm"
