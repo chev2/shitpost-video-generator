@@ -4,8 +4,7 @@ from sys import maxsize
 from os import listdir, mkdir, path
 
 # MoviePy modules
-from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips, Effect, vfx
-from moviepy.Clip import Clip
+from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, CompositeVideoClip, ImageClip, concatenate_videoclips, vfx, VideoClip
 
 from src import custom_effects
 
@@ -15,28 +14,36 @@ from tqdm import tqdm
 """
 
     TODO:
-        flash random images in short bursts at long intervals
         try to overlap videos more and distort them
         spread out audio duplication a bit, so they don't end up directly next to one another
 """
 
 VIDEO_SOURCE_FOLDER = "input_video_sources"
 AUDIO_SOURCE_FOLDER = "input_audio_sources"
+IMAGE_SOURCE_FOLDER = "input_image_sources"
 
 videoFiles = [VIDEO_SOURCE_FOLDER + "/" + vid for vid in listdir(VIDEO_SOURCE_FOLDER)]
 audioFiles = [AUDIO_SOURCE_FOLDER + "/" + vid for vid in listdir(AUDIO_SOURCE_FOLDER)]
+imageFiles = [IMAGE_SOURCE_FOLDER + "/" + vid for vid in listdir(IMAGE_SOURCE_FOLDER)]
 
 # All video clips will be trimmed to be between these two lengths
-# default: 0.5, 3.5 | chaos: 0.3, 1.2
-video_clip_times = (0.4, 0.8)
-# All audio clips will be trimemd to be between these two lengths
-# default: 0.7, 13. chaos: 0.7, 3.0
+# default: 0.4, 3.0 | chaos: 0.3, 1.2
+video_clip_times = (0.4, 3.0)
+# All audio clips will be trimmed to be between these two lengths
+# default: 0.7, 3.0 | chaos: 0.2, 1.0
 audio_clip_times = (0.7, 3.0)
+# All image clips will be trimmed to be between these two lengths
+# default: 0.3, 0.8 | chaos: 0.1, 0.5
+image_clip_times = (0.3, 0.8)
 
 # Audio amount multiplier (based off the amount of videos)
 # e.g. 60 videos with a multiplier of 0.75 means 45 audio clips will be put into the final result.
-# default: 0.75. chaos: 1.5
-AUDIO_AMOUNT_MULTIPLIER = 1.5
+# default: 0.75 | chaos: 1.5
+AUDIO_AMOUNT_MULTIPLIER = 0.75
+
+# Image amount multiplier (pretty much ditto as audio amount multiplier)
+# default: 0.6 | chaos: 2.0
+IMAGE_AMOUNT_MULTIPLIER = 2
 
 # (min, max) random values range, inclusive
 #integer. default: 1, 7
@@ -92,6 +99,7 @@ videoEffects = [
 
 videoObjects = []
 audioObjects = []
+imageObjects = []
 
 videoAmount = input("Amount of videos: ")
 while not videoAmount.isdecimal():
@@ -114,7 +122,6 @@ if videoAmount > len(videoFiles): #if there is a higher chosen amount than total
     randomVideos += additionalVideos
 
 print("")
-print(f"Compiling {videoAmount} videos... ", end="\r")
 
 with tqdm(desc="Compiling videos", total=len(randomVideos)) as pbar:
     for index, video in enumerate(randomVideos):
@@ -138,7 +145,7 @@ with tqdm(desc="Compiling videos", total=len(randomVideos)) as pbar:
 
 print("Finished compiling videos.")
 
-finalVideo = concatenate_videoclips(videoObjects, method="compose") # method="compose"
+finalVideo: VideoClip = concatenate_videoclips(videoObjects, method="compose")
 
 audioAmount = int(videoAmount*AUDIO_AMOUNT_MULTIPLIER)
 
@@ -151,7 +158,6 @@ if audioAmount > len(audioFiles):
     randomSounds += additionalAudio
 
 print("")
-print(f"Compiling {audioAmount} sounds...", end="\r")
 
 copiedSoundAmount = 0
 with tqdm(desc="Compiling sounds", total=len(randomSounds)) as pbar:
@@ -200,6 +206,53 @@ with tqdm(desc="Compiling sounds", total=len(randomSounds)) as pbar:
 
 print(f"Finished compiling audio. Added {copiedSoundAmount} duplicate sounds, total {audioAmount+copiedSoundAmount}.")
 
+imageAmount = int(videoAmount * IMAGE_AMOUNT_MULTIPLIER)
+
+randomImages = rng.sample(imageFiles, k=min(audioAmount, len(imageFiles)))
+
+if imageAmount > len(imageFiles):
+    imageAmountToAdd = imageAmount - len(imageFiles)
+    print(f"Chosen image amount is higher than available image amount - re-using {imageAmountToAdd} image sources...")
+    additionalImages = rng.choices(imageFiles, k=imageAmountToAdd)
+    randomImages += additionalImages
+
+print("")
+
+with tqdm(desc="Compiling images", total=len(randomImages)) as pbar:
+    for index, imagePath in enumerate(randomImages):
+        # Load the image as a clip
+        clipDuration = rng.uniform(*image_clip_times)
+        newClip = ImageClip(imagePath, duration=clipDuration)
+        
+        # Resize the image randomly, relative to the video's output resolution
+        clipWidthNormal = rng.uniform(0.15, 1)
+        clipWidth = int(finalVideo.w * clipWidthNormal)
+        clipHeightNormal = rng.uniform(0.15, 1)
+        clipHeight = int(finalVideo.h * clipHeightNormal)
+        newClip = newClip.with_effects([vfx.Resize((clipWidth, clipHeight))])
+
+        # Place the image randomly (coordinates-wise) in the final video
+        clipOffsetXNormal = rng.uniform(0, 1)
+        clipOffsetX = min(
+            int(finalVideo.w * clipOffsetXNormal),
+            finalVideo.w - clipWidth
+        )
+        clipOffsetYNormal = rng.uniform(0, 1)
+        clipOffsetY = min(
+            int(finalVideo.h * clipOffsetYNormal),
+            finalVideo.h - clipHeight
+        )
+        newClip = newClip.with_position((clipOffsetX, clipOffsetY))
+
+        # Place the image at a random spot (duration-wise) in the final video
+        newClip = newClip.with_start(rng.uniform(0, finalVideo.duration - newClip.duration))
+
+        imageObjects.append(newClip)
+
+        pbar.update(1)
+
+finalVideo = CompositeVideoClip([finalVideo] + imageObjects)
+
 # The video's filename
 finalVideoFilename = f"output/result_seed-{seed}_{videoAmount}{'_effects' if shouldUseEffects else ''}.mp4"
 
@@ -226,3 +279,5 @@ for video in videoObjects:
     video.close()
 for audio in audioObjects:
     audio.close()
+for image in imageObjects:
+    image.close()
