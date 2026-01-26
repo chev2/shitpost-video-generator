@@ -7,6 +7,8 @@ from os import listdir, mkdir, path
 from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, concatenate_videoclips, Effect, vfx
 from moviepy.Clip import Clip
 
+from src import custom_effects
+
 # Progress bars
 from tqdm import tqdm
 
@@ -68,91 +70,6 @@ rng = random.Random(seed)
 print("")
 print(f"Found {len(videoFiles)} videos and {len(audioFiles)} sounds")
 
-class ContinuousFlipVideo(Effect):
-    def apply(self, clip: Clip): #flip a video multiple times over its duration
-        #how many times the clip will be flipped
-        flip_amt = rng.randint(*continuous_flip_amount)
-        #random periods at which to shuffle
-        flip_periods = [rng.uniform(0, clip.duration) for _ in range(flip_amt)]
-
-        flip_periods.sort() #in ascending order
-        all_clips = []
-        last_period = 0
-
-        for period in flip_periods:
-            new_clip = clip.subclipped(last_period, period)
-            all_clips.append(new_clip)
-            last_period = period
-
-        new_clip = clip.subclipped(last_period, clip.duration)
-        all_clips.append(new_clip)
-
-        for i in range(len(all_clips)):
-            # Either flip on the X, or Y, or don't flip at all
-            effect_to_use = rng.choice((vfx.MirrorX(), vfx.MirrorY(), None))
-
-            if effect_to_use is not None:
-                all_clips[i] = all_clips[i].with_effects((effect_to_use,))
-
-        final_clip = concatenate_videoclips(all_clips)
-
-        return final_clip
-
-class RepeatMultiple(Effect):
-    def apply(self, clip: Clip) -> Clip: #repeat a video multiple times
-        random_dur = rng.uniform(*repeat_video_amount)
-        repeat_amt = int((clip.duration / random_dur) * 0.5)
-
-        start_offset = rng.uniform(0, clip.duration - random_dur)
-        new_clip = clip.subclipped(start_offset, start_offset + random_dur)
-
-        final_clip = concatenate_videoclips([new_clip]*repeat_amt)
-        return final_clip
-
-# take a clip, split it into multiple parts, shuffle those parts
-class ShuffleVideo(Effect):
-    def apply(self, clip: Clip):
-        #how many times the clip will be split and shuffled
-        shuffle_amt = rng.randint(*shuffle_video_amount)
-        #random periods at which to shuffle
-        shuffle_periods = [rng.uniform(0, clip.duration) for _ in range(shuffle_amt)]
-
-        shuffle_periods.sort() #in ascending order
-        all_clips = []
-        last_period = 0
-
-        for period in shuffle_periods:
-            new_clip = clip.subclipped(last_period, period)
-            all_clips.append(new_clip)
-            last_period = period
-
-        new_clip = clip.subclipped(last_period, clip.duration)
-        all_clips.append(new_clip)
-        rng.shuffle(all_clips) #shuffle around the clips to get the final result
-        final_clip = concatenate_videoclips(all_clips)
-
-        return final_clip
-
-# makes the clip "rotate" by flipping and reversing the second part of the clip
-class FlipRotationVideo(Effect):
-    def apply(self, clip: Clip):
-        random_duration = rng.uniform(0.1, 0.3)
-
-        start_offset = rng.uniform(0, clip.duration - random_duration)
-        first_clip = clip.subclipped(start_offset, start_offset+random_duration)
-
-        # Flip horizontal, then reverse video
-        second_clip = first_clip.copy().with_effects((vfx.MirrorX(), vfx.TimeMirror()))
-
-        # Speed up the clips
-        first_clip = first_clip.with_effects((vfx.MultiplySpeed(1.5),))
-        second_clip = second_clip.with_effects((vfx.MultiplySpeed(1.5),))
-
-        # Number of times to do this flip-rotation
-        flip_rotation_count = random.randint(*flip_rotation_amount)
-
-        return concatenate_videoclips([first_clip, second_clip] * flip_rotation_count)
-
 videoEffects = [
     # Speed up or slow down
     (vfx.MultiplySpeed(rng.uniform(*random_speed_amount)),),
@@ -165,12 +82,12 @@ videoEffects = [
     (vfx.TimeSymmetrize(), vfx.MultiplySpeed(rng.uniform(1.4, 2.3))),
     # Change contrast
     (vfx.LumContrast(lum=0, contrast=rng.uniform(*contrast_amount)),),
-    # Continuously repeat the video
-    (RepeatMultiple(),),
-    # Flip the video on the x and y axis multiple times
-    (ContinuousFlipVideo(),),
-    (ShuffleVideo(),),
-    (FlipRotationVideo(),)
+
+    # Custom effects we use to mimic various YTP-like effects
+    (custom_effects.RepeatMultiple(rng, *repeat_video_amount),),
+    (custom_effects.ContinuousFlipVideo(rng, *continuous_flip_amount),),
+    (custom_effects.ShuffleVideo(rng, *shuffle_video_amount),),
+    (custom_effects.FlipRotationVideo(rng, *flip_rotation_amount),)
 ]
 
 videoObjects = []
