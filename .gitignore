@@ -21,6 +21,8 @@ recodevideofiles.py
 !input_audio_sources/BOOM.mp3
 !input_audio_sources/Bruh Sound Effect #2.mp3
 !input_audio_sources/Damn Son.mp3
+!input_image_sources/troll-face.jpg
+!input_image_sources/tennis-ball-bird.jpg
 
 # Linux
 .directory
