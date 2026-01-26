@@ -14,6 +14,16 @@ recodevideofiles.py
 *.wav
 *.flac
 
+# Image file formats
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.tiff
+*.avif
+*.jxl
+*.bmp
+
 # Repository-specific - only allow these video and audio sources
 !input_video_sources/DOOR STUCK! DOOR STUCK!.mp4
 !input_video_sources/FUS RO DAH!!!.mp4
