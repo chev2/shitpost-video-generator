@@ -53,7 +53,10 @@ class RepeatMultiple(Effect):
 
     def apply(self, clip: Clip) -> Clip:
         random_dur = self.rng.uniform(self.repeat_video_duration_min, self.repeat_video_duration_max)
-        repeat_amt = int((clip.duration / random_dur) * 0.5)
+        repeat_amt = min(
+            int((clip.duration / random_dur) * 0.5),
+            2
+        )
 
         start_offset = self.rng.uniform(0, clip.duration - random_dur)
         new_clip = clip.subclipped(start_offset, start_offset + random_dur)
