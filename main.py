@@ -43,7 +43,7 @@ AUDIO_AMOUNT_MULTIPLIER = 0.75
 
 # Image amount multiplier (pretty much ditto as audio amount multiplier)
 # default: 0.6 | chaos: 2.0
-IMAGE_AMOUNT_MULTIPLIER = 2
+IMAGE_AMOUNT_MULTIPLIER = 0.6
 
 # (min, max) random values range, inclusive
 #integer. default: 1, 7
