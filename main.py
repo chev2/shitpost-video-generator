@@ -171,7 +171,7 @@ with tqdm(desc="Compiling sounds", total=len(randomSounds)) as pbar:
         #  the audio coming from the video clips
         newClip = newClip.with_volume_scaled(0.6)
 
-        if newClip.duration > 5: #for long clips
+        if newClip.duration > 1:
             randomDuration = rng.uniform(*audio_clip_times) # crop audio duration
             # if the audio is longer than the cropped duration, crop the audio at a random position
             if newClip.duration > randomDuration:
@@ -181,6 +181,7 @@ with tqdm(desc="Compiling sounds", total=len(randomSounds)) as pbar:
 
             newClip = newClip.with_start(rng.uniform(0, finalVideo.duration-newClip.duration)) # move audio around video length
             audioObjects.append(newClip)
+        # only apply duplication to clips shorter than 1 second
         else:
             # Place to position the audio clip - could be anywhere from the final video's start all the way to its full duration
             clipPosition = rng.uniform(0, finalVideo.duration - newClip.duration)
