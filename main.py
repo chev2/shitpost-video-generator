@@ -75,7 +75,7 @@ print(f"Chose seed: {seed}")
 rng = random.Random(seed)
 
 print("")
-print(f"Found {len(videoFiles)} videos and {len(audioFiles)} sounds")
+print(f"Found {len(videoFiles)} videos, {len(audioFiles)} sounds, {len(imageFiles)} images")
 
 videoEffects = [
     # Speed up or slow down
