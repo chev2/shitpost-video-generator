@@ -4,7 +4,7 @@ from sys import maxsize
 from os import listdir, mkdir, path
 
 # MoviePy modules
-from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, CompositeVideoClip, ImageClip, concatenate_videoclips, vfx, VideoClip
+from moviepy import VideoFileClip, AudioFileClip, CompositeAudioClip, CompositeVideoClip, ImageClip, concatenate_videoclips, vfx, afx, VideoClip
 
 from src import custom_effects
 
@@ -163,6 +163,10 @@ copiedSoundAmount = 0
 with tqdm(desc="Compiling sounds", total=len(randomSounds)) as pbar:
     for index, audio in enumerate(randomSounds):
         newClip = AudioFileClip(audio)
+
+        # Normalize the audio volume first
+        newClip = newClip.with_effects([afx.AudioNormalize()])
+
         # Modify the volume of audio clips so that they (hopefully) won't drown out
         #  the audio coming from the video clips
         newClip = newClip.with_volume_scaled(0.6)
