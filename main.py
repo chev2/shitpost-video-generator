@@ -14,13 +14,19 @@ from tqdm import tqdm
 """
 
     TODO:
-        try to overlap videos more and distort them
-        spread out audio duplication a bit, so they don't end up directly next to one another
 """
 
-VIDEO_SOURCE_FOLDER = "input_video_sources"
-AUDIO_SOURCE_FOLDER = "input_audio_sources"
-IMAGE_SOURCE_FOLDER = "input_image_sources"
+# Legacy directory paths, warn the user about them
+if path.exists("input_video_sources") \
+    or path.exists("input_audio_sources") \
+    or path.exists("input_image_sources"):
+    print("WARNING: You are using the legacy input source folders input_video_sources, input_audio_sources, and/or input_image_sources.")
+    print("You must move your sources to input/video, input/audio and input/image for them to work again.")
+    print("")
+
+VIDEO_SOURCE_FOLDER = "input/video"
+AUDIO_SOURCE_FOLDER = "input/audio"
+IMAGE_SOURCE_FOLDER = "input/image"
 
 videoFiles = [VIDEO_SOURCE_FOLDER + "/" + vid for vid in listdir(VIDEO_SOURCE_FOLDER)]
 audioFiles = [AUDIO_SOURCE_FOLDER + "/" + vid for vid in listdir(AUDIO_SOURCE_FOLDER)]

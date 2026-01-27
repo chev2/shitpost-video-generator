@@ -3,7 +3,7 @@ Generates an output video with overlayed audio and effects using a list of audio
 
 ## How it works
 Here's how it works:
-1. Gets all sources to use from the `input_video_sources/`, `input_audio_sources/` and `input_image_sources/` directories. This is where you put your sources.
+1. Gets all sources to use from the `input/video/`, `input/audio/` and `input/image/` directories. This is where you put your sources.
 2. Gets a seed for the random number generator, which can be used if a user wants to re-generate the same exact video again.
 3. Chooses _n_ random videos where _n_ is the number of videos the user wants to merge into the final results (e.g. if you want to merge 40 different videos, it chooses 40 random videos). The script will first to attempt to avoid duplicate videos. If the chosen video amount is higher than the available videos, then the script will add duplicate videos to meet that amount.
 4. Applies a bunch of random effects to the video files, which include trimming the video to be a random short length, mirroring the video, speeding it up or slowing it down, reversing the video, as well as other effects.
@@ -37,9 +37,9 @@ Please take a look at the **requirements** above before following these steps. *
 
 1. Download the GitHub repo (click the green 'code' button, then 'Download ZIP') and extract it somewhere.
 2. Put a list of desired sources into their respective directories:
-    - Videos in `input_video_sources/`
-    - Sounds in `input_audio_sources/`
-    - Images in `input_image_sources/`
+    - Videos in `input/video/`
+    - Sounds in `input/audio/`
+    - Images in `input/image/`
 3. Run the script, and choose a seed if you want to reproduce the same video later. Otherwise, type 'any' to choose a random seed.
 4. Choose the amount of videos you want the script to merge together to produce the final result.
 5. The script will do the rest, and generate the final video in the root directory, which will be formatted as `result_seed-<seed>_<number-of-videos>_<effects-enabled>.mp4`.

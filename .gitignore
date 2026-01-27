@@ -25,14 +25,14 @@ recodevideofiles.py
 *.bmp
 
 # Repository-specific - only allow these video and audio sources
-!input_video_sources/DOOR STUCK! DOOR STUCK!.mp4
-!input_video_sources/FUS RO DAH!!!.mp4
-!input_video_sources/Me at the zoo.mp4
-!input_audio_sources/BOOM.mp3
-!input_audio_sources/Bruh Sound Effect #2.mp3
-!input_audio_sources/Damn Son.mp3
-!input_image_sources/troll-face.jpg
-!input_image_sources/tennis-ball-bird.jpg
+!input/video/DOOR STUCK! DOOR STUCK!.mp4
+!input/video/FUS RO DAH!!!.mp4
+!input/video/Me at the zoo.mp4
+!input/audio/BOOM.mp3
+!input/audio/Bruh Sound Effect #2.mp3
+!input/audio/Damn Son.mp3
+!input/image/troll-face.jpg
+!input/image/tennis-ball-bird.jpg
 
 # Linux
 .directory
