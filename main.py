@@ -195,7 +195,7 @@ with tqdm(desc="Compiling sounds", total=len(randomSounds)) as pbar:
 
                 dupe_clip_position = clipPosition + ((i * 0.9) * rng.uniform(0.8, 1.2))
                 # If the duplicate clip goes over the final video duration, simply discard that duplicate clip
-                if dupe_clip_position > finalVideo.duration:
+                if (dupe_clip_position + newClip.duration) > finalVideo.duration:
                     continue
 
                 """# Max 0 and clip position - 2 so it doesn't go into negative clip position (if near beginning of video)
